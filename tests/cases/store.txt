@@ -1,0 +1,79 @@
+# ops run in order on a fresh copy of tests/cases/store-fixture; tools/store_oracle.py and tests/store_cases.mojo must print the same
+list
+list iris
+list iris:aaaa1111
+list iris:zzzz
+list nosuch
+list llama-7b
+get iris
+get iris:latest
+get iris:bbbb
+get iris:aaaa
+get iris:aaaa2222
+get iris:nosuch
+get nosuch
+get llama-7b:q4
+get tiny_st:v0.1.0
+get tiny_st:v0
+get onlyver
+get IRIS:AAAA1111
+get iris:
+get Bad_Name!
+get -leading
+get trailing-
+get iris:bad!ver
+get aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+list iris:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+tree
+micros 2026-01-01T00:00:00.5+00:00
+micros 2026-01-01_00:00:00.123+05:30
+micros 2026-01-01T00:00:00-03:30
+micros 1969-12-31T23:59:59.999999+00:00
+micros 2024-02-29T12:00:00+00:00
+micros 2000-03-01T00:00:00Z
+micros 2100-03-01T00:00:00+00:00
+get ties
+list ties
+delete ties:t1
+get ties
+get nolatest
+get stale
+list nolatest
+tree
+weights iris:bbbb3333
+weights iris:aaaa1111
+weights iris:aaaa2222
+weights llama-7b
+weights tiny_st
+register iris:cccc4444 2026-04-01T00:00:00+00:00
+get iris
+register iris:dddd5555 2025-01-01T00:00:00+00:00
+get iris
+list iris
+register iris:eeee6666 2026-04-01T01:00:00+02:00
+get iris
+register iris:ffff7777 2026-03-31T20:00:00-05:00
+get iris
+register iris:dddd5555 2026-09-09T09:09:09.090909+00:00
+register Bad!Name:v1 2026-01-01T00:00:00+00:00
+register fresh:one 2026-08-01T00:00:00+00:00
+get fresh
+register fresh:two 2026-08-01T00:00:00+00:00
+get fresh
+tree
+delete iris:cccc4444
+get iris
+delete iris:latest
+get iris
+delete iris:zzzz
+delete nosuch
+delete nosuch:latest
+delete llama-7b:q4
+list llama-7b
+delete onlyver:latest
+list onlyver
+delete tiny_st
+list
+delete stale:s2
+get stale
+tree

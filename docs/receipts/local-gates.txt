@@ -1,0 +1,15 @@
+$ scripts/local-gates.sh
+systemd: states activating active -> StatusText 'listening on 21958', stop -> inactive
+exit 0
+BUILT $HOME/Projects/mojo/mojo-bento/.work/b7/build (2.5M)
+VERIFIED $HOME/Projects/mojo/mojo-bento/.work/b7/moved
+sandboxed bento listening on 37877
+b2: 74 rows, 0 failed
+./models/iris/v3/model.bin: FAILED
+verify rejects a changed file: ok
+missing model fails the build: ok
+exit 0
+PASS b4systemd b7
+real	0m14.815s
+user	0m16.425s
+sys	0m1.005s

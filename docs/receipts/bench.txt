@@ -1,0 +1,13 @@
+$ scripts/bench.sh
+echo handler, 4 workers
+  GET, 1 connections: 160565 requests, 53522 req/s (1 connections, pipeline 1)
+  GET, 8 connections: 715694 requests, 238565 req/s (8 connections, pipeline 1)
+  GET, 32 connections: 845519 requests, 281840 req/s (32 connections, pipeline 1)
+  GET, 8 connections, pipeline 16: 3924256 requests, 1308085 req/s (8 connections, pipeline 16)
+Service with metrics, 4 workers
+  POST /add, 8 connections: 674930 requests, 224977 req/s (8 connections, pipeline 1)
+  SSE, 100000 events to one client: 4977794 bytes in 568 ms (176056 events/s)
+PASS bench
+real	0m25.702s
+user	0m27.779s
+sys	0m16.550s

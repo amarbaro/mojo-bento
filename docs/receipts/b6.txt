@@ -1,0 +1,4 @@
+$ tests/run.sh b6
+b6 wire: 26 rows, 0 failed
+b6 sse: httpx-sse parsed 6 events equal to those sent; first of 6 slow items after 0 ms, last after 751 ms; 8 mid-stream disconnects freed the workers in 0.00 s
+exit 0

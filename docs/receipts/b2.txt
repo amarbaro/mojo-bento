@@ -1,0 +1,3 @@
+$ tests/run.sh b2
+b2: 74 rows, 0 failed
+exit 0

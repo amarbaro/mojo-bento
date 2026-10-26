@@ -1,0 +1,4 @@
+$ tests/run.sh b1
+selfcheck: 25 rows, 0 failed
+check: 59 rows, 0 failed
+exit 0

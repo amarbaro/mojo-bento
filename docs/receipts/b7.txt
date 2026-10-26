@@ -1,0 +1,9 @@
+$ scripts/local-gates.sh (tests/run.sh b7)
+BUILT $HOME/Projects/mojo/mojo-bento/.work/b7/build (2.5M)
+VERIFIED $HOME/Projects/mojo/mojo-bento/.work/b7/moved
+sandboxed bento listening on 37877
+b2: 74 rows, 0 failed
+./models/iris/v3/model.bin: FAILED
+verify rejects a changed file: ok
+missing model fails the build: ok
+exit 0

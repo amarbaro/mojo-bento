@@ -1,0 +1,23 @@
+$ tests/run.sh b3
+ok batch1: PASS 244 rows
+ok b-dominates: PASS 344 rows
+ok burst-100: PASS 106 rows
+ok jitter-heavy: PASS 446 rows
+ok long-bursty: PASS 1704 rows
+ok long-heavy: PASS 7412 rows
+ok long-load: PASS 5230 rows
+ok on-off: PASS 243 rows
+ok overload-cancel: PASS 627 rows
+ok poisson-300: PASS 567 rows
+ok rate-ramp: PASS 695 rows
+ok single: PASS 2 rows
+ok slow-20s: PASS 207 rows
+ok small-batch-4: PASS 361 rows
+ok sparse: PASS 64 rows
+ok tiny-latency: PASS 412 rows
+traces: 16, failures: 0
+PASS batch-replay
+batched 400 items into 51 calls, largest 8
+overload dropped 150 of 200 - batcher: overloaded (waited longer than max_latency)
+PASS batch-threads
+exit 0

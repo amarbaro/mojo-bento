@@ -1,0 +1,368 @@
+> list
+item iris:aaaa1111 2026-01-01T00:00:00+00:00
+item iris:aaaa2222 2026-02-01T10:00:00.500000+00:00
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+item llama-7b:q4 2026-02-15T08:00:00+00:00
+item nolatest:v1 2026-05-01T00:00:00+00:00
+item nolatest:v2 2026-04-01T00:00:00+00:00
+item onlyver:x1 2026-07-01T00:00:00+00:00
+item stale:s1 2026-06-01T00:00:00+00:00
+item stale:s2 2026-06-02T00:00:00+00:00
+item ties:t1 2026-08-08T08:08:08+00:00
+item ties:t2 2026-08-08T08:08:08+00:00
+item ties:t3 2026-08-08T08:08:08+00:00
+item tiny_st:v0.1.0 2025-12-31T23:59:59.999999+00:00
+> list iris
+item iris:aaaa1111 2026-01-01T00:00:00+00:00
+item iris:aaaa2222 2026-02-01T10:00:00.500000+00:00
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+> list iris:aaaa1111
+item iris:aaaa1111 2026-01-01T00:00:00+00:00
+> list iris:zzzz
+(none)
+> list nosuch
+error NotFound: no Models with name 'nosuch' found
+> list llama-7b
+item llama-7b:q4 2026-02-15T08:00:00+00:00
+> get iris
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+> get iris:latest
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+> get iris:bbbb
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+> get iris:aaaa
+error BentoMLException: Multiple iris versions found: aaaa1111, aaaa2222
+> get iris:aaaa2222
+item iris:aaaa2222 2026-02-01T10:00:00.500000+00:00
+> get iris:nosuch
+error NotFound: Model 'iris:nosuch' is not found in BentoML store $ROOT, you may need to run `bentoml models pull` first
+> get nosuch
+error NotFound: no Models with name 'nosuch' exist in BentoML store $ROOT
+> get llama-7b:q4
+item llama-7b:q4 2026-02-15T08:00:00+00:00
+> get tiny_st:v0.1.0
+item tiny_st:v0.1.0 2025-12-31T23:59:59.999999+00:00
+> get tiny_st:v0
+item tiny_st:v0.1.0 2025-12-31T23:59:59.999999+00:00
+> get onlyver
+item onlyver:x1 2026-07-01T00:00:00+00:00
+> get IRIS:AAAA1111
+item iris:aaaa1111 2026-01-01T00:00:00+00:00
+> get iris:
+error BentoMLException: iris: contains trailing ':'. Maybe you meant to use `iris::latest`?
+> get Bad_Name!
+error ValueError: bad_name! is not a valid BentoML tag: a tag's name or version must consist of lowercase alphanumeric characters, '_', '-', or '.', and must start and end with an alphanumeric character
+> get -leading
+error ValueError: -leading is not a valid BentoML tag: a tag's name or version must consist of lowercase alphanumeric characters, '_', '-', or '.', and must start and end with an alphanumeric character
+> get trailing-
+error ValueError: trailing- is not a valid BentoML tag: a tag's name or version must consist of lowercase alphanumeric characters, '_', '-', or '.', and must start and end with an alphanumeric character
+> get iris:bad!ver
+error BentoMLException: Invalid Tag iris:bad!ver
+> get aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+error ValueError: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa is not a valid BentoML tag: a tag's name or version must be at most 63 characters in length
+> list iris:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+error BentoMLException: Invalid Tag iris:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+> tree
+iris/
+iris/aaaa1111/
+iris/aaaa1111/model.safetensors 128
+iris/aaaa1111/model.yaml 259 creation_time: '2026-01-01T00:00:00+00:00'
+iris/aaaa2222/
+iris/aaaa2222/model.yaml 266 creation_time: '2026-02-01T10:00:00.500000+00:00'
+iris/bbbb3333/
+iris/bbbb3333/model.safetensors 188
+iris/bbbb3333/model.yaml 266 creation_time: '2026-03-01T12:30:45.123456+00:00'
+iris/bbbb3333/notes.txt 6
+iris/latest 8 = bbbb3333
+llama-7b/
+llama-7b/latest 2 = q4
+llama-7b/q4/
+llama-7b/q4/model.gguf 96
+llama-7b/q4/model.yaml 257 creation_time: '2026-02-15T08:00:00+00:00'
+llama-7b/q4/tokenizer.json 2
+nolatest/
+nolatest/v1/
+nolatest/v1/model.yaml 257 creation_time: '2026-05-01T00:00:00+00:00'
+nolatest/v2/
+nolatest/v2/model.yaml 257 creation_time: '2026-04-01T00:00:00+00:00'
+onlyver/
+onlyver/latest 2 = x1
+onlyver/x1/
+onlyver/x1/model.yaml 256 creation_time: '2026-07-01T00:00:00+00:00'
+stale/
+stale/latest 4 = gone
+stale/s1/
+stale/s1/model.yaml 254 creation_time: '2026-06-01T00:00:00+00:00'
+stale/s2/
+stale/s2/model.yaml 254 creation_time: '2026-06-02T00:00:00+00:00'
+ties/
+ties/t1/
+ties/t1/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+ties/t2/
+ties/t2/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+ties/t3/
+ties/t3/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+tiny_st/
+tiny_st/latest 6 = v0.1.0
+tiny_st/v0.1.0/
+tiny_st/v0.1.0/model.safetensors 68
+tiny_st/v0.1.0/model.yaml 267 creation_time: '2025-12-31T23:59:59.999999+00:00'
+> micros 2026-01-01T00:00:00.5+00:00
+1767225600500000
+> micros 2026-01-01_00:00:00.123+05:30
+1767205800123000
+> micros 2026-01-01T00:00:00-03:30
+1767238200000000
+> micros 1969-12-31T23:59:59.999999+00:00
+-1
+> micros 2024-02-29T12:00:00+00:00
+1709208000000000
+> micros 2000-03-01T00:00:00Z
+951868800000000
+> micros 2100-03-01T00:00:00+00:00
+4107542400000000
+> get ties
+item ties:t1 2026-08-08T08:08:08+00:00
+> list ties
+item ties:t1 2026-08-08T08:08:08+00:00
+item ties:t2 2026-08-08T08:08:08+00:00
+item ties:t3 2026-08-08T08:08:08+00:00
+> delete ties:t1
+ok
+> get ties
+item ties:t3 2026-08-08T08:08:08+00:00
+> get nolatest
+item nolatest:v1 2026-05-01T00:00:00+00:00
+> get stale
+item stale:s2 2026-06-02T00:00:00+00:00
+> list nolatest
+item nolatest:v1 2026-05-01T00:00:00+00:00
+item nolatest:v2 2026-04-01T00:00:00+00:00
+> tree
+iris/
+iris/aaaa1111/
+iris/aaaa1111/model.safetensors 128
+iris/aaaa1111/model.yaml 259 creation_time: '2026-01-01T00:00:00+00:00'
+iris/aaaa2222/
+iris/aaaa2222/model.yaml 266 creation_time: '2026-02-01T10:00:00.500000+00:00'
+iris/bbbb3333/
+iris/bbbb3333/model.safetensors 188
+iris/bbbb3333/model.yaml 266 creation_time: '2026-03-01T12:30:45.123456+00:00'
+iris/bbbb3333/notes.txt 6
+iris/latest 8 = bbbb3333
+llama-7b/
+llama-7b/latest 2 = q4
+llama-7b/q4/
+llama-7b/q4/model.gguf 96
+llama-7b/q4/model.yaml 257 creation_time: '2026-02-15T08:00:00+00:00'
+llama-7b/q4/tokenizer.json 2
+nolatest/
+nolatest/latest 2 = v1
+nolatest/v1/
+nolatest/v1/model.yaml 257 creation_time: '2026-05-01T00:00:00+00:00'
+nolatest/v2/
+nolatest/v2/model.yaml 257 creation_time: '2026-04-01T00:00:00+00:00'
+onlyver/
+onlyver/latest 2 = x1
+onlyver/x1/
+onlyver/x1/model.yaml 256 creation_time: '2026-07-01T00:00:00+00:00'
+stale/
+stale/latest 2 = s2
+stale/s1/
+stale/s1/model.yaml 254 creation_time: '2026-06-01T00:00:00+00:00'
+stale/s2/
+stale/s2/model.yaml 254 creation_time: '2026-06-02T00:00:00+00:00'
+ties/
+ties/latest 2 = t3
+ties/t2/
+ties/t2/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+ties/t3/
+ties/t3/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+tiny_st/
+tiny_st/latest 6 = v0.1.0
+tiny_st/v0.1.0/
+tiny_st/v0.1.0/model.safetensors 68
+tiny_st/v0.1.0/model.yaml 267 creation_time: '2025-12-31T23:59:59.999999+00:00'
+> weights iris:bbbb3333
+weight model.safetensors safetensors 3
+> weights iris:aaaa1111
+weight model.safetensors safetensors 2
+> weights iris:aaaa2222
+(none)
+> weights llama-7b
+weight model.gguf gguf 0
+> weights tiny_st
+weight model.safetensors safetensors 1
+> register iris:cccc4444 2026-04-01T00:00:00+00:00
+ok
+> get iris
+item iris:cccc4444 2026-04-01T00:00:00+00:00
+> register iris:dddd5555 2025-01-01T00:00:00+00:00
+ok
+> get iris
+item iris:cccc4444 2026-04-01T00:00:00+00:00
+> list iris
+item iris:aaaa1111 2026-01-01T00:00:00+00:00
+item iris:aaaa2222 2026-02-01T10:00:00.500000+00:00
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+item iris:cccc4444 2026-04-01T00:00:00+00:00
+item iris:dddd5555 2025-01-01T00:00:00+00:00
+> register iris:eeee6666 2026-04-01T01:00:00+02:00
+ok
+> get iris
+item iris:cccc4444 2026-04-01T00:00:00+00:00
+> register iris:ffff7777 2026-03-31T20:00:00-05:00
+ok
+> get iris
+item iris:ffff7777 2026-03-31T20:00:00-05:00
+> register iris:dddd5555 2026-09-09T09:09:09.090909+00:00
+error BentoMLException: Item 'iris:dddd5555' already exists in the store $ROOT
+> register Bad!Name:v1 2026-01-01T00:00:00+00:00
+error BentoMLException: Invalid Tag Bad!Name:v1
+> register fresh:one 2026-08-01T00:00:00+00:00
+ok
+> get fresh
+item fresh:one 2026-08-01T00:00:00+00:00
+> register fresh:two 2026-08-01T00:00:00+00:00
+ok
+> get fresh
+item fresh:two 2026-08-01T00:00:00+00:00
+> tree
+fresh/
+fresh/latest 3 = two
+fresh/one/
+fresh/one/model.yaml 255 creation_time: '2026-08-01T00:00:00+00:00'
+fresh/two/
+fresh/two/model.yaml 255 creation_time: '2026-08-01T00:00:00+00:00'
+iris/
+iris/aaaa1111/
+iris/aaaa1111/model.safetensors 128
+iris/aaaa1111/model.yaml 259 creation_time: '2026-01-01T00:00:00+00:00'
+iris/aaaa2222/
+iris/aaaa2222/model.yaml 266 creation_time: '2026-02-01T10:00:00.500000+00:00'
+iris/bbbb3333/
+iris/bbbb3333/model.safetensors 188
+iris/bbbb3333/model.yaml 266 creation_time: '2026-03-01T12:30:45.123456+00:00'
+iris/bbbb3333/notes.txt 6
+iris/cccc4444/
+iris/cccc4444/model.yaml 259 creation_time: '2026-04-01T00:00:00+00:00'
+iris/dddd5555/
+iris/dddd5555/model.yaml 259 creation_time: '2025-01-01T00:00:00+00:00'
+iris/eeee6666/
+iris/eeee6666/model.yaml 259 creation_time: '2026-04-01T01:00:00+02:00'
+iris/ffff7777/
+iris/ffff7777/model.yaml 259 creation_time: '2026-03-31T20:00:00-05:00'
+iris/latest 8 = ffff7777
+llama-7b/
+llama-7b/latest 2 = q4
+llama-7b/q4/
+llama-7b/q4/model.gguf 96
+llama-7b/q4/model.yaml 257 creation_time: '2026-02-15T08:00:00+00:00'
+llama-7b/q4/tokenizer.json 2
+nolatest/
+nolatest/latest 2 = v1
+nolatest/v1/
+nolatest/v1/model.yaml 257 creation_time: '2026-05-01T00:00:00+00:00'
+nolatest/v2/
+nolatest/v2/model.yaml 257 creation_time: '2026-04-01T00:00:00+00:00'
+onlyver/
+onlyver/latest 2 = x1
+onlyver/x1/
+onlyver/x1/model.yaml 256 creation_time: '2026-07-01T00:00:00+00:00'
+stale/
+stale/latest 2 = s2
+stale/s1/
+stale/s1/model.yaml 254 creation_time: '2026-06-01T00:00:00+00:00'
+stale/s2/
+stale/s2/model.yaml 254 creation_time: '2026-06-02T00:00:00+00:00'
+ties/
+ties/latest 2 = t3
+ties/t2/
+ties/t2/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+ties/t3/
+ties/t3/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+tiny_st/
+tiny_st/latest 6 = v0.1.0
+tiny_st/v0.1.0/
+tiny_st/v0.1.0/model.safetensors 68
+tiny_st/v0.1.0/model.yaml 267 creation_time: '2025-12-31T23:59:59.999999+00:00'
+> delete iris:cccc4444
+ok
+> get iris
+item iris:ffff7777 2026-03-31T20:00:00-05:00
+> delete iris:latest
+ok
+> get iris
+item iris:eeee6666 2026-04-01T01:00:00+02:00
+> delete iris:zzzz
+error NotFound: Model 'iris:zzzz' not found
+> delete nosuch
+error NotFound: Model 'nosuch' not found
+> delete nosuch:latest
+ok
+> delete llama-7b:q4
+ok
+> list llama-7b
+error NotFound: no Models with name 'llama-7b' found
+> delete onlyver:latest
+ok
+> list onlyver
+error NotFound: no Models with name 'onlyver' found
+> delete tiny_st
+ok
+> list
+item fresh:one 2026-08-01T00:00:00+00:00
+item fresh:two 2026-08-01T00:00:00+00:00
+item iris:aaaa1111 2026-01-01T00:00:00+00:00
+item iris:aaaa2222 2026-02-01T10:00:00.500000+00:00
+item iris:bbbb3333 2026-03-01T12:30:45.123456+00:00
+item iris:dddd5555 2025-01-01T00:00:00+00:00
+item iris:eeee6666 2026-04-01T01:00:00+02:00
+item nolatest:v1 2026-05-01T00:00:00+00:00
+item nolatest:v2 2026-04-01T00:00:00+00:00
+item stale:s1 2026-06-01T00:00:00+00:00
+item stale:s2 2026-06-02T00:00:00+00:00
+item ties:t2 2026-08-08T08:08:08+00:00
+item ties:t3 2026-08-08T08:08:08+00:00
+> delete stale:s2
+ok
+> get stale
+item stale:s1 2026-06-01T00:00:00+00:00
+> tree
+fresh/
+fresh/latest 3 = two
+fresh/one/
+fresh/one/model.yaml 255 creation_time: '2026-08-01T00:00:00+00:00'
+fresh/two/
+fresh/two/model.yaml 255 creation_time: '2026-08-01T00:00:00+00:00'
+iris/
+iris/aaaa1111/
+iris/aaaa1111/model.safetensors 128
+iris/aaaa1111/model.yaml 259 creation_time: '2026-01-01T00:00:00+00:00'
+iris/aaaa2222/
+iris/aaaa2222/model.yaml 266 creation_time: '2026-02-01T10:00:00.500000+00:00'
+iris/bbbb3333/
+iris/bbbb3333/model.safetensors 188
+iris/bbbb3333/model.yaml 266 creation_time: '2026-03-01T12:30:45.123456+00:00'
+iris/bbbb3333/notes.txt 6
+iris/dddd5555/
+iris/dddd5555/model.yaml 259 creation_time: '2025-01-01T00:00:00+00:00'
+iris/eeee6666/
+iris/eeee6666/model.yaml 259 creation_time: '2026-04-01T01:00:00+02:00'
+iris/latest 8 = eeee6666
+nolatest/
+nolatest/latest 2 = v1
+nolatest/v1/
+nolatest/v1/model.yaml 257 creation_time: '2026-05-01T00:00:00+00:00'
+nolatest/v2/
+nolatest/v2/model.yaml 257 creation_time: '2026-04-01T00:00:00+00:00'
+stale/
+stale/latest 2 = s1
+stale/s1/
+stale/s1/model.yaml 254 creation_time: '2026-06-01T00:00:00+00:00'
+ties/
+ties/latest 2 = t3
+ties/t2/
+ties/t2/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'
+ties/t3/
+ties/t3/model.yaml 253 creation_time: '2026-08-08T08:08:08+00:00'

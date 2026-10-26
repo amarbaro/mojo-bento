@@ -1,0 +1,75 @@
+# name<TAB>METHOD<TAB>/path<TAB>content-type or -<TAB>body; see tools/b2_oracle.py
+echo_ok	POST	/echo	application/json	{"text":"hi"}
+echo_unicode_raw	POST	/echo	application/json	{"text":"héllo é 😀"}
+echo_unicode_escaped	POST	/echo	application/json	{"text":"h\\u00e9llo \\ud83d\\ude00"}
+echo_escapes	POST	/echo	application/json	{"text":"quote\\" back\\\\ nl\\n tab\\t ctl\\u0001"}
+echo_extra_field_ignored	POST	/echo	application/json	{"text":"hi","extra":1}
+echo_no_content_type	POST	/echo	-	{"text":"hi"}
+echo_query_string_ignored	POST	/echo?x=1&y=2	application/json	{"text":"hi"}
+echo_whitespace_around	POST	/echo	application/json	  {"text" : "hi"}  \n
+echo_long_text	POST	/echo	application/json	{"text":"{a*900}"}
+echo_empty_body_missing	POST	/echo	application/json	
+echo_missing_field	POST	/echo	application/json	{}
+echo_wrong_type_int	POST	/echo	application/json	{"text":5}
+echo_wrong_type_null	POST	/echo	application/json	{"text":null}
+echo_not_object_array	POST	/echo	application/json	[1]
+echo_not_object_null	POST	/echo	application/json	null
+echo_not_object_string	POST	/echo	application/json	"str"
+json_bad_key	POST	/echo	application/json	{bad
+json_trailing_chars	POST	/echo	application/json	{"text":"a"} x
+json_eof_value	POST	/echo	application/json	{"text":
+json_eof_string	POST	/echo	application/json	{"text":"a
+json_trailing_comma	POST	/echo	application/json	{"text":"a",}
+json_expected_colon	POST	/echo	application/json	{"text" "a"}
+json_expected_ident	POST	/echo	application/json	{"text":tru}
+json_eof_object	POST	/echo	application/json	{"text":"a"
+json_whitespace_only	POST	/echo	application/json	   
+json_second_line	POST	/echo	application/json	{\n"text":\n  x}
+json_list_eof	POST	/stats	application/json	{"values":[1,2
+json_list_expected_comma	POST	/stats	application/json	{"values":[1 2]}
+json_list_trailing_comma	POST	/stats	application/json	{"values":[1,]}
+add_ok	POST	/add	application/json	{"a":1,"b":2}
+add_negative	POST	/add	application/json	{"a":-5,"b":2}
+add_strings_coerced	POST	/add	application/json	{"a":"12","b":" 7 "}
+add_float_integral	POST	/add	application/json	{"a":2.0,"b":-3}
+add_exponent	POST	/add	application/json	{"a":1e3,"b":2}
+add_bool_true	POST	/add	application/json	{"a":true,"b":2}
+add_missing_b	POST	/add	application/json	{"a":1}
+add_both_missing	POST	/add	application/json	{}
+add_two_issues	POST	/add	application/json	{"a":"x","b":[1]}
+add_null	POST	/add	application/json	{"a":null,"b":2}
+add_float_fraction	POST	/add	application/json	{"a":1.5,"b":2}
+add_string_fraction	POST	/add	application/json	{"a":"1.5","b":2}
+add_empty_string	POST	/add	application/json	{"a":"","b":2}
+stats_ok	POST	/stats	application/json	{"values":[1,2.5,3]}
+stats_empty	POST	/stats	application/json	{"values":[]}
+stats_float_repr	POST	/stats	application/json	{"values":[0.1,0.2]}
+stats_string_items	POST	/stats	application/json	{"values":["1",2]}
+stats_bad_item	POST	/stats	application/json	{"values":[1,"x"]}
+stats_not_list	POST	/stats	application/json	{"values":5}
+stats_big_exponent	POST	/stats	application/json	{"values":[1e300,2e-300,12345678901234567890]}
+greet_default	POST	/greet	application/json	{"name":"x"}
+greet_excited	POST	/greet	application/json	{"name":"x","excited":true}
+greet_string_yes	POST	/greet	application/json	{"name":"x","excited":"yes"}
+greet_int_one	POST	/greet	application/json	{"name":"x","excited":1}
+greet_int_two	POST	/greet	application/json	{"name":"x","excited":2}
+greet_string_maybe	POST	/greet	application/json	{"name":"x","excited":"maybe"}
+greet_null_flag	POST	/greet	application/json	{"name":"x","excited":null}
+tag_unicode_dict	POST	/tag	application/json	{"text":"héllo 😀"}
+tag_repeat	POST	/tag	application/json	{"text":"a","n":2}
+tag_repeat_zero	POST	/tag	application/json	{"text":"a","n":0}
+scale_ok	POST	/scale	application/json	{"values":[1,2,3],"k":0.5}
+scale_empty	POST	/scale	application/json	{"values":[],"k":2}
+scale_two_issues	POST	/scale	application/json	{"values":[1,2.5],"k":"x"}
+scale_k_string	POST	/scale	application/json	{"values":[1],"k":"1.5"}
+route_unknown	POST	/nosuch	application/json	{}
+route_wrong_case	POST	/ECHO	application/json	{"text":"a"}
+method_get	GET	/echo	-	
+method_put	PUT	/echo	application/json	{"text":"a"}
+method_delete	DELETE	/echo	-	
+error_unhandled_500	POST	/boom	application/json	{}
+error_http_400_ascii	POST	/refuse	application/json	{"why":"nope"}
+error_http_400_unicode	POST	/refuse	application/json	{"why":"café \\"q\\" \\n"}
+error_http_403	POST	/deny	application/json	{}
+error_http_404	POST	/missing	application/json	{"what":"café"}
+error_http_503	POST	/unavailable	application/json	{}

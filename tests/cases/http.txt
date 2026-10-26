@@ -1,0 +1,61 @@
+# name<TAB>flags<TAB>raw request (escapes decoded; {c*N} repeats c N times)
+# flags: hs = also checked against http.server; head = HEAD response; trickle; split:N; half = shutdown(WR) after send
+get_simple	hs	GET / HTTP/1.1\r\nHost: x\r\n\r\n
+get_query	hs	GET /a/b?x=1&y=%20z HTTP/1.1\r\nHost: x\r\n\r\n
+post_content_length	hs	POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\n\r\nhello
+post_zero_length	hs	POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: 0\r\n\r\n
+post_chunked	hs	POST /p HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n6\r\n world\r\n0\r\n\r\n
+post_chunked_extension	hs	POST /p HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n3;name=val\r\nabc\r\n0\r\n\r\n
+post_chunked_trailer	hs	POST /p HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n3\r\nabc\r\n0\r\nX-Trail: 1\r\n\r\n
+post_chunked_hex_upper	hs	POST /p HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\nA\r\n0123456789\r\n0\r\n\r\n
+head_request	head,hs	HEAD /h HTTP/1.1\r\nHost: x\r\n\r\n
+method_custom	hs	PURGE /cache HTTP/1.1\r\nHost: x\r\n\r\n
+options_star	hs	OPTIONS * HTTP/1.1\r\nHost: x\r\n\r\n
+pipeline_2	hs	GET /1 HTTP/1.1\r\nHost: x\r\n\r\nGET /2 HTTP/1.1\r\nHost: x\r\n\r\n
+pipeline_5_mixed	hs	GET /1 HTTP/1.1\r\nHost: x\r\n\r\nPOST /2 HTTP/1.1\r\nHost: x\r\nContent-Length: 3\r\n\r\nabcGET /3 HTTP/1.1\r\nHost: x\r\n\r\nPOST /4 HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n2\r\nhi\r\n0\r\n\r\nHEAD /5 HTTP/1.1\r\nHost: x\r\n\r\n
+pipeline_100	hs	GET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\nGET /n HTTP/1.1\r\nHost: x\r\n\r\n
+close_header	hs	GET / HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n
+close_token_list		GET / HTTP/1.1\r\nHost: x\r\nConnection: TE, Close\r\n\r\n
+close_mid_pipeline	hs	GET /1 HTTP/1.1\r\nHost: x\r\n\r\nGET /2 HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\nGET /3 HTTP/1.1\r\nHost: x\r\n\r\n
+http10_closes	hs	GET / HTTP/1.0\r\n\r\n
+http10_host_closes	hs	GET / HTTP/1.0\r\nHost: x\r\n\r\n
+trickle_bytewise	trickle	POST /t HTTP/1.1\r\nHost: x\r\nContent-Length: 4\r\n\r\nabcd
+trickle_chunked	trickle	POST /t HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n4\r\nabcd\r\n0\r\n\r\n
+split_head_then_body	split:50,hs	POST /s HTTP/1.1\r\nHost: x\r\nContent-Length: 6\r\n\r\nabcdef
+expect_100_continue	split:76	POST /e HTTP/1.1\r\nHost: x\r\nExpect: 100-continue\r\nContent-Length: 3\r\n\r\nabc
+header_duplicates_keep_order	hs	GET / HTTP/1.1\r\nHost: x\r\nX-A: 1\r\nX-B: 2\r\nX-A: 3\r\n\r\n
+header_ows_trimmed		GET / HTTP/1.1\r\nHost: x\r\nX-A:   v w  \t\r\n\r\n
+header_empty_value	hs	GET / HTTP/1.1\r\nHost: x\r\nX-A:\r\n\r\n
+header_name_case	hs	GET / HTTP/1.1\r\nhOsT: x\r\nX-MiXeD: V\r\n\r\n
+header_obs_text_value		GET / HTTP/1.1\r\nHost: x\r\nX-A: caf\xe9\r\n\r\n
+head_near_cap_ok	hs	GET / HTTP/1.1\r\nHost: x\r\nX-Pad: {a*7900}\r\n\r\n
+target_long_ok	hs	GET /{a*4000} HTTP/1.1\r\nHost: x\r\n\r\n
+body_at_limit_ok	hs	POST /b HTTP/1.1\r\nHost: x\r\nContent-Length: 1024\r\n\r\n{b*1024}
+bad_request_line_garbage		garbage\r\n\r\n
+bad_two_spaces		GET  / HTTP/1.1\r\nHost: x\r\n\r\n
+bad_no_version		GET /\r\nHost: x\r\n\r\n
+bad_version_text		GET / HTTP/x.y\r\nHost: x\r\n\r\n
+bad_leading_crlf		\r\nGET / HTTP/1.1\r\nHost: x\r\n\r\n
+bad_method_chars		G@T / HTTP/1.1\r\nHost: x\r\n\r\n
+version_2_is_505		GET / HTTP/2.0\r\nHost: x\r\n\r\n
+missing_host_http11		GET / HTTP/1.1\r\nAccept: */*\r\n\r\n
+duplicate_host		GET / HTTP/1.1\r\nHost: x\r\nHost: y\r\n\r\n
+space_before_colon		GET / HTTP/1.1\r\nHost : x\r\n\r\n
+header_without_colon		GET / HTTP/1.1\r\nHost: x\r\nNoColonHere\r\n\r\n
+control_char_in_value		GET / HTTP/1.1\r\nHost: x\r\nX-A: a\x00b\r\n\r\n
+content_length_not_digits		POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: 5x\r\n\r\nhello
+content_length_negative		POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: -5\r\n\r\nhello
+content_length_conflict		POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\nContent-Length: 6\r\n\r\nhello!
+content_length_repeat_equal_ok		POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: 5, 5\r\n\r\nhello
+content_length_plus_chunked		POST /p HTTP/1.1\r\nHost: x\r\nContent-Length: 5\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n
+transfer_encoding_unknown		POST /p HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: gzip\r\n\r\nxx
+head_over_cap_431		GET / HTTP/1.1\r\nHost: x\r\nX-Pad: {a*9000}\r\n\r\n
+head_over_cap_never_ends_431		GET / HTTP/1.1\r\nHost: x\r\nX-Pad: {a*9000}
+body_over_limit_413		POST /b HTTP/1.1\r\nHost: x\r\nContent-Length: 2000\r\n\r\n{c*100}
+chunked_over_limit_413		POST /b HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n258\r\n{d*600}\r\n258\r\n{d*600}\r\n0\r\n\r\n
+chunk_size_not_hex		POST /b HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\nzz\r\nabc\r\n0\r\n\r\n
+chunk_data_not_crlf		POST /b HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n3\r\nabcXY0\r\n\r\n
+eof_inside_body	half	POST /b HTTP/1.1\r\nHost: x\r\nContent-Length: 10\r\n\r\nabc
+eof_inside_head	half	GET / HTTP/1.1\r\nHost: x\r\n
+request_then_half_close	half	GET / HTTP/1.1\r\nHost: x\r\n\r\n
+error_after_good_request		GET /ok HTTP/1.1\r\nHost: x\r\n\r\nGET /bad HTTP/1.1\r\nHost : x\r\n\r\nGET /never HTTP/1.1\r\nHost: x\r\n\r\n

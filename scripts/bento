@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# bento: package a Mojo service into one self-contained directory and run it from there.
+#   bento build SERVICE.toml OUT   compile the entry, ship the Modular runtime libs, copy the models, write lock + unit
+#   bento serve OUT [PORT]         run OUT/bin/<name> with the toml's args ({port}, {models} substituted)
+#   bento verify OUT               recheck every file against OUT/bento.lock
+# SERVICE.toml (flat, one key per line): name, version, entry, args, store, models = ["name:tag", ...]
+set -euo pipefail
+FAIL() { echo "FAIL $1: $2" >&2; exit 1; }
+key() { sed -nE "s/^$1[[:space:]]*=[[:space:]]*\"(.*)\"[[:space:]]*(#.*)?$/\1/p" "$2" | head -1; }
+
+build() {
+  local toml=$1 out=$2 root name entry store
+  root=$(cd "$(dirname "$0")/.." && pwd)
+  [ -f "$toml" ] || FAIL toml "no file $toml"
+  name=$(key name "$toml"); entry=$(key entry "$toml"); store=$(key store "$toml")
+  [ -n "$name" ] && [ -n "$entry" ] || FAIL toml "name and entry are required"
+  [[ $entry == /* ]] || entry="$(cd "$(dirname "$toml")" && pwd)/$entry"
+  rm -rf "$out"; mkdir -p "$out/bin" "$out/lib" "$out/models"; out=$(cd "$out" && pwd)
+  "$root/scripts/mojo.sh" "$entry" "$out/bin/$name" || FAIL compile "$entry"
+  # the binary's RUNPATH points into the build venv: ship those libs and point it at ../lib
+  local libdir
+  libdir=$(readelf -d "$out/bin/$name" | sed -nE 's/.*(RUNPATH|RPATH).*\[(.*)\]/\2/p')
+  for lib in $(ldd "$out/bin/$name" | awk -v d="$libdir" 'index($3, d) == 1 {print $3}'); do cp -L "$lib" "$out/lib/"; done
+  patchelf --set-rpath '$ORIGIN/../lib' "$out/bin/$name"
+  ldd "$out/bin/$name" | grep -q "not found" && FAIL libs "$(ldd "$out/bin/$name" | grep 'not found')"
+  # models: name[:version|:latest] resolved in the store (BentoML layout), reflinked on btrfs, copied elsewhere
+  store=${store/#\~/$HOME}
+  for ref in $(sed -nE 's/^models[[:space:]]*=[[:space:]]*\[(.*)\].*/\1/p' "$toml" | tr -d '" ' | tr ',' ' '); do
+    local m=${ref%%:*} v=${ref#*:}
+    [ "$v" = "$ref" ] || [ "$v" = latest ] && v=$(cat "$store/$m/latest" 2>/dev/null || true)
+    [ -n "$v" ] && [ -d "$store/$m/$v" ] || FAIL model "$ref not in store $store"
+    mkdir -p "$out/models/$m"; cp -a --reflink=auto "$store/$m/$v" "$out/models/$m/$v"; echo "$v" > "$out/models/$m/latest"
+  done
+  cp "$toml" "$out/service.toml"
+  cat > "$out/$name.service" <<E
+[Unit]
+Description=$name (mojo-bento)
+[Service]
+ExecStart=$out/bento-serve
+Restart=on-failure
+[Install]
+WantedBy=default.target
+E
+  printf '#!/bin/sh\nexec "$(dirname "$(readlink -f "$0")")/bin/bento" serve "$(dirname "$(readlink -f "$0")")" "$@"\n' > "$out/bento-serve"
+  cp "$0" "$out/bin/bento"; chmod +x "$out/bento-serve" "$out/bin/bento"
+  { echo "# name $name version $(key version "$toml") commit $(git -C "$root" rev-parse --short HEAD) mojo $("$root/.venv/bin/mojo" --version | head -1)"
+    (cd "$out" && find . -type f ! -name bento.lock | sort | xargs sha256sum); } > "$out/bento.lock"
+  echo "BUILT $out ($(du -sh "$out" | cut -f1))"
+}
+
+serve() {
+  local out=$1 port=${2:-0} name args
+  name=$(key name "$out/service.toml"); args=$(key args "$out/service.toml")
+  [ -x "$out/bin/$name" ] || FAIL serve "no binary $out/bin/$name"
+  args=${args//\{port\}/$port}; args=${args//\{models\}/$out/models}
+  BENTO_MODELS="$out/models" exec "$out/bin/$name" $args
+}
+
+verify() {
+  local out=$1
+  [ -f "$out/bento.lock" ] || FAIL verify "no $out/bento.lock"
+  (cd "$out" && grep -v '^#' bento.lock | sha256sum --quiet -c -) || FAIL verify "files differ from bento.lock"
+  echo "VERIFIED $out"
+}
+
+case "${1:-}" in
+  build) [ $# -eq 3 ] || FAIL usage "bento build SERVICE.toml OUT"; build "$2" "$3" ;;
+  serve) [ $# -ge 2 ] || FAIL usage "bento serve OUT [PORT]"; serve "$2" "${3:-0}" ;;
+  verify) [ $# -eq 2 ] || FAIL usage "bento verify OUT"; verify "$2" ;;
+  *) FAIL usage "bento build|serve|verify" ;;
+esac

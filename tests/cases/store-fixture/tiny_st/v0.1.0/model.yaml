@@ -1,0 +1,14 @@
+name: tiny_st
+version: v0.1.0
+module: ''
+labels: {}
+options: {}
+metadata: {}
+context:
+  framework_name: mojo
+  framework_versions: {}
+  bentoml_version: mojo-bento
+  python_version: '-'
+signatures: {}
+api_version: v1
+creation_time: '2025-12-31T23:59:59.999999+00:00'

@@ -1,0 +1,16 @@
+[project]
+name = "mojo-bento"
+version = "0.1.0"
+description = "BentoML's serving core as a Mojo library: an HTTP/1.1 server and typed JSON endpoints that answer like BentoML 1.4"
+license = "Apache-2.0"
+requires-python = ">=3.11,<3.16"
+dependencies = ["mojo>=1.1.0,<1.2"]
+
+[dependency-groups]
+dev = [
+  "bentoml==1.4.39",
+  "h11==0.16.0",
+  "prometheus-client==0.26.0",
+  "httpx==0.28.1",
+  "httpx-sse==0.4.3",
+]

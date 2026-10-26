@@ -1,0 +1,14 @@
+name: stale
+version: s2
+module: ''
+labels: {}
+options: {}
+metadata: {}
+context:
+  framework_name: mojo
+  framework_versions: {}
+  bentoml_version: mojo-bento
+  python_version: '-'
+signatures: {}
+api_version: v1
+creation_time: '2026-06-02T00:00:00+00:00'

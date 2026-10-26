@@ -1,0 +1,7 @@
+tree: 01981ba (git rev-parse --short HEAD when scripts/ci.sh and scripts/local-gates.sh ran; scripts/bench.sh ran on the same sources)
+cpu: AMD Ryzen 7 7800X3D 8-Core Processor, 16 threads
+ram: 61 GiB
+os: Linux 7.2.11-arch1-1, EndeavourOS
+mojo: Mojo 1.1.0 (8189361e)
+python: Python 3.15.0, bentoml 1.4.39
+note: one run each; Python load generators (lower bound)

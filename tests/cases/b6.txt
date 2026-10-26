@@ -1,0 +1,27 @@
+# generator endpoints against BentoML on the wire; see tools/b6_oracle.py
+count_3	1.1	/count	{"n":3}	
+count_0	1.1	/count	{"n":0}	
+count_1	1.1	/count	{"n":1}	
+count_prefix_unicode	1.1	/count	{"n":2,"prefix":"é"}	
+count_prefix_newline	1.1	/count	{"n":2,"prefix":"a\\nb"}	
+count_200	1.1	/count	{"n":200}	
+records_3	1.1	/records	{"n":3}	
+numbers_5	1.1	/numbers	{"n":5}	
+broken_mid_stream	1.1	/broken	{"n":2}	
+early_error	1.1	/early	{"n":2}	
+bad_input_400	1.1	/count	{"n":"x"}	
+count_3_http10	1.0	/count	{"n":3}	
+count_0_http10	1.0	/count	{"n":0}	
+count_1_http10	1.0	/count	{"n":1}	
+count_prefix_unicode_http10	1.0	/count	{"n":2,"prefix":"é"}	
+count_prefix_newline_http10	1.0	/count	{"n":2,"prefix":"a\\nb"}	
+count_200_http10	1.0	/count	{"n":200}	
+records_3_http10	1.0	/records	{"n":3}	
+numbers_5_http10	1.0	/numbers	{"n":5}	
+broken_mid_stream_http10	1.0	/broken	{"n":2}	
+early_error_http10	1.0	/early	{"n":2}	
+bad_input_400_http10	1.0	/count	{"n":"x"}	
+count_keepalive	1.1	/count	{"n":3}	keepalive
+records_keepalive	1.1	/records	{"n":2}	keepalive
+empty_keepalive	1.1	/count	{"n":0}	keepalive
+error_keepalive	1.1	/early	{"n":2}	keepalive

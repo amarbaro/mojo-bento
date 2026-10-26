@@ -1,0 +1,5 @@
+$ tests/run.sh b4
+b2: 18 rows, 0 failed
+b4 metrics: parser accepted 3 families; counts exact (7 ok, 3x400, 2x500, 1x403, then 1600 from 8 threads)
+b4 drain: SIGTERM -> /readyz 503, /healthz 200, exited 0.70s later
+exit 0

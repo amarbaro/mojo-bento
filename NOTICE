@@ -1,0 +1,4 @@
+mojo-bento
+Copyright 2026 AMARBARO · amarbaro.org labs <dev@amarbaro.org>
+Ideas and behaviour ported from BentoML (https://github.com/bentoml/BentoML), Apache License 2.0,
+Copyright BentoML contributors. The HTTP grammar follows h11 (MIT), used here as a test oracle only.

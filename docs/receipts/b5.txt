@@ -1,0 +1,4 @@
+$ tests/run.sh b5
+ops: 78, output lines: 368
+PASS store
+exit 0

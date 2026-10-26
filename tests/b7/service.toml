@@ -1,0 +1,6 @@
+name = "b2svc"
+version = "0.1.0"
+entry = "../b2_service.mojo"
+args = "{port}"
+store = ".work/b7/store"
+models = ["iris:latest", "tok:v2"]

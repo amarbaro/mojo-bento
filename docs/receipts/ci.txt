@@ -1,0 +1,46 @@
+$ scripts/ci.sh
+Resolved 81 packages in 6ms
+Checked 77 packages in 1ms
+oracle python 3.15.0 bentoml 1.4.39
+selfcheck: 25 rows, 0 failed
+check: 59 rows, 0 failed
+exit 0
+b2: 74 rows, 0 failed
+exit 0
+ok batch1: PASS 244 rows
+ok b-dominates: PASS 344 rows
+ok burst-100: PASS 106 rows
+ok jitter-heavy: PASS 446 rows
+ok long-bursty: PASS 1704 rows
+ok long-heavy: PASS 7412 rows
+ok long-load: PASS 5230 rows
+ok on-off: PASS 243 rows
+ok overload-cancel: PASS 627 rows
+ok poisson-300: PASS 567 rows
+ok rate-ramp: PASS 695 rows
+ok single: PASS 2 rows
+ok slow-20s: PASS 207 rows
+ok small-batch-4: PASS 361 rows
+ok sparse: PASS 64 rows
+ok tiny-latency: PASS 412 rows
+traces: 16, failures: 0
+PASS batch-replay
+batched 400 items into 51 calls, largest 8
+overload dropped 150 of 200 - batcher: overloaded (waited longer than max_latency)
+PASS batch-threads
+exit 0
+b2: 18 rows, 0 failed
+b4 metrics: parser accepted 3 families; counts exact (7 ok, 3x400, 2x500, 1x403, then 1600 from 8 threads)
+b4 drain: SIGTERM -> /readyz 503, /healthz 200, exited 0.70s later
+exit 0
+ops: 78, output lines: 368
+PASS store
+exit 0
+b6 wire: 26 rows, 0 failed
+b6 sse: httpx-sse parsed 6 events equal to those sent; first of 6 slow items after 0 ms, last after 751 ms; 8 mid-stream disconnects freed the workers in 0.00 s
+exit 0
+PASS b1 b2 b3 b4 b5 b6
+PASS ci
+real	0m56.311s
+user	0m57.688s
+sys	0m3.026s

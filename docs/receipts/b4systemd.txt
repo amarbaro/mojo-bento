@@ -1,0 +1,3 @@
+$ scripts/local-gates.sh (tests/run.sh b4systemd)
+systemd: states activating active -> StatusText 'listening on 21958', stop -> inactive
+exit 0

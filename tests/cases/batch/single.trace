@@ -1,0 +1,6 @@
+max_latency_ms 100
+max_batch 8
+dur_a_ns 2050500
+dur_b_ns 4949300
+jitter_ns 0
+arrive 12300000
