@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "BentoML's serving core as a Mojo library: an HTTP/1.1 server and typed JSON endpoints that answer like BentoML 1.4"
 license = "Apache-2.0"
 requires-python = ">=3.11,<3.16"
-dependencies = ["mojo>=1.1.0,<1.2"]
+dependencies = ["mojo>=1.2.0,<1.3"]
 
 [dependency-groups]
 dev = [
