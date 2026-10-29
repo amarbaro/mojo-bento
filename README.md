@@ -28,7 +28,7 @@ def main() raises:
 
 ## Install
 
-Requires Mojo 1.1 (`uv sync` installs it) and Linux x86-64.
+Requires Mojo 1.2 (`uv sync` installs it) and Linux x86-64.
 
 | Way | Command |
 |---|---|

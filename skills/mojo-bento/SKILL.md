@@ -5,7 +5,7 @@ description: "Serve a Mojo program over HTTP the way BentoML 1.4 does: an epoll 
 
 # mojo-bento
 
-BentoML's serving core in Mojo 1.1, checked against BentoML 1.4.39 by byte-comparing answers.
+BentoML's serving core in Mojo 1.2, checked against BentoML 1.4.39 by byte-comparing answers.
 
 ## Install
 
