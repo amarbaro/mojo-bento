@@ -1,6 +1,9 @@
 # mojo-bento
 
-[![CI](https://github.com/amarbaro/mojo-bento/actions/workflows/ci.yml/badge.svg)](https://github.com/amarbaro/mojo-bento/actions/workflows/ci.yml)
+<!-- badges -->
+[![ci](https://github.com/amarbaro/mojo-bento/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/amarbaro/mojo-bento/actions/workflows/ci.yml) [![latest release](https://img.shields.io/github/v/release/amarbaro/mojo-bento)](https://github.com/amarbaro/mojo-bento/releases/latest) [![license](https://img.shields.io/github/license/amarbaro/mojo-bento)](https://github.com/amarbaro/mojo-bento/blob/main/LICENSE)
+<!-- /badges -->
+
 
 BentoML's serving core as a Mojo library: an epoll HTTP/1.1 server, typed JSON endpoints that answer byte for byte like
 BentoML 1.4.39 (success and validation errors), health and Prometheus metrics, sd_notify with a graceful drain, chunked
