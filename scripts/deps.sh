@@ -14,7 +14,7 @@ done <<'PINS'
 aio mojo-aio f902fc8ed350bd7b865b3e526600022923bc2a15
 gguf mojo-gguf-core 1ad0178b7ebc1b470b72260b5684348bc150b292
 json mojo-json 70ff3c988af1b9e88685ce1b8243ccf73f342acc
-posix mojo-posix 9f9e7639bc99577c479aa79538c1e15c432083fe
-safetensors mojo-safetensors 7edf6439526b232c0935cfb6f2e194aa1b4433ad
-systemd mojo-systemd dd53aa2113afd41af00d683f7da8ad5d8ff078fc
+posix mojo-posix ee4f89da1d9f472c83977c3222e01fc142b85010
+safetensors mojo-safetensors 07f6d0fd6a56ad5c4850c354e94661eff45aff7a
+systemd mojo-systemd 93f3ec367e8cd9d8c3a9db7ffadd0973be8515b0
 PINS
