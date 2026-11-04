@@ -102,7 +102,7 @@ struct Server[H: Handler](Movable):
         var tids = List[UInt64](length=workers, fill=0)
         var me = Int(Pointer(to=self))
         for i in range(workers):
-            var rc = external_call["pthread_create", Int32](tids.unsafe_ptr() + i, Int(0), _worker_main[Self.H], me)
+            var rc = external_call["pthread_create", Int32](tids.unsafe_ptr().unsafe_offset(i), Int(0), _worker_main[Self.H], me)
             if rc != 0:
                 self.stop()
                 raise Error("bento: pthread_create rc ", rc)
@@ -167,7 +167,7 @@ struct Server[H: Handler](Movable):
                     self.loop.remove(fd)
                 except:
                     pass
-                (self.conn_p + Int(fd))[].reset()
+                self.conn_p.unsafe_offset(Int(fd))[].reset()
                 close(fd)
 
     def _accept(self):
@@ -179,7 +179,7 @@ struct Server[H: Handler](Movable):
                 if Int(c) >= len(self.table):
                     close(c)
                     continue
-                (self.conn_p + Int(c))[].open = True
+                self.conn_p.unsafe_offset(Int(c))[].open = True
                 self.loop.add(c, IN | RDHUP | ONESHOT, UInt64(c))
         except:
             pass
@@ -190,7 +190,7 @@ struct Server[H: Handler](Movable):
 
     def _serve(self, fd: Int32, events: Int) -> Bool:
         """Read what arrived on fd, answer every complete request. False: close the connection."""
-        ref c = (self.conn_p + Int(fd))[]
+        ref c = self.conn_p.unsafe_offset(Int(fd))[]
         var n = recv(fd, c.inbuf)
         if n == 0:
             return False
