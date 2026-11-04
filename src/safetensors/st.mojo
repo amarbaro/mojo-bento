@@ -171,7 +171,13 @@ struct SafeTensors(Movable):
             ref t = self.tensors[o.i]
             if t.begin != at or t.end < t.begin:
                 raise Error("safetensors: ", self.path, ": invalid offset for tensor ", t.name)
-            if t.numel() * dtype_bits(t.dtype) != t.nbytes() * 8:
+            var lim = Int.MAX // dtype_bits(t.dtype)  # numel * bits must not wrap
+            var n = 1
+            for d in t.shape:
+                if d != 0 and n > lim // d:
+                    raise Error("safetensors: ", self.path, ": shape overflows for tensor ", t.name)
+                n *= d
+            if n * dtype_bits(t.dtype) != t.nbytes() * 8:
                 raise Error("safetensors: ", self.path, ": invalid shape, data type, or offset for tensor ", t.name)
             at = t.end
         if at != self.size - self.data_start:
