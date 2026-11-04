@@ -34,16 +34,19 @@ struct Conn(Movable):
     var inbuf: List[UInt8]
     var pos: Int  # start of the unparsed bytes in inbuf
     var told: Bool  # a 100-continue went out for the request being read
+    var open: Bool  # the fd is accepted and not yet closed: serve() closes what is still open on return
 
     def __init__(out self):
         self.inbuf = List[UInt8]()
         self.pos = 0
         self.told = False
+        self.open = False
 
     def reset(mut self):
         self.inbuf = List[UInt8]()
         self.pos = 0
         self.told = False
+        self.open = False
 
 
 struct Server[H: Handler](Movable):
@@ -132,8 +135,9 @@ struct Server[H: Handler](Movable):
         for i in range(workers):
             _ = external_call["pthread_join", Int32](tids[i], Int(0))
         for fd in range(len(self.table)):
-            if len(self.table[fd].inbuf) > 0 or self.table[fd].pos > 0 or self.table[fd].told:
-                self.table[fd].reset()
+            if self.table[fd].open:
+                close(Int32(fd))
+            self.table[fd].reset()
         close(self.listen_fd)
         if self.sig >= 0:
             close(self.sig)
@@ -175,6 +179,7 @@ struct Server[H: Handler](Movable):
                 if Int(c) >= len(self.table):
                     close(c)
                     continue
+                (self.conn_p + Int(c))[].open = True
                 self.loop.add(c, IN | RDHUP | ONESHOT, UInt64(c))
         except:
             pass
