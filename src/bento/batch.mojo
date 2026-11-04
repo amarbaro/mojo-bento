@@ -8,7 +8,7 @@ Errors: `run_batch` raising fails every item of that batch with its message; an 
 `max_latency_ms` fails with "batcher: overloaded" (BentoML answers those with its fallback, an HTTP 503).
 """
 from std.ffi import external_call
-from std.memory import alloc
+from std.memory import alloc, Layout
 from bento.sync import Mutex, Cond
 from std.time import perf_counter_ns
 from bento.dispatch import Cork, IDLE, CANCEL, SLEEP, DISPATCH
@@ -148,9 +148,9 @@ def _controller_main[In: Copyable & Deinitable, Out: Copyable & Deinitable](arg:
             _ = external_call["usleep", Int32](Int32(1000))
             c[].mu.lock()
         else:
-            var b = alloc[Batch](1)
+            var b = alloc(Layout[Batch](count=1)).unsafe_leak()
             b.unsafe_write(Batch(arg, c[].cork.out_ids.copy(), now, c[].cork.out_first, c[].cork.out_training))
-            var tid = alloc[UInt64](1)
+            var tid = alloc(Layout[UInt64](count=1)).unsafe_leak()
             var rc = external_call["pthread_create", Int32](tid, Int(0), _batch_main[In, Out], Int(b))
             if rc != 0:
                 # no thread for this batch: fail its jobs instead of hanging their submitters
@@ -182,7 +182,7 @@ struct Batcher[In: Copyable & Deinitable, Out: Copyable & Deinitable](Movable):
         max_batch_size: Int = 32,
         max_inflight: Int = 1,
     ):
-        self.core = alloc[Core[Self.In, Self.Out]](1)
+        self.core = alloc(Layout[Core[Self.In, Self.Out]](count=1)).unsafe_leak()
         self.core.unsafe_write(Core[Self.In, Self.Out](Cork(max_latency_ms, max_batch_size, 0.0, max_inflight), run_batch))
 
     def submit(self, var item: Self.In) raises -> Self.Out:
@@ -193,7 +193,7 @@ struct Batcher[In: Copyable & Deinitable, Out: Copyable & Deinitable](Movable):
             c[].mu.unlock()
             raise Error("batcher: closed")
         if not c[].started:
-            var tid = alloc[UInt64](1)
+            var tid = alloc(Layout[UInt64](count=1)).unsafe_leak()
             var rc = external_call["pthread_create", Int32](tid, Int(0), _controller_main[Self.In, Self.Out], Int(c))
             if rc != 0:
                 tid.unsafe_free()
@@ -204,7 +204,7 @@ struct Batcher[In: Copyable & Deinitable, Out: Copyable & Deinitable](Movable):
             c[].started = True
         var id = c[].next_id
         c[].next_id += 1
-        var j = alloc[Job[Self.In, Self.Out]](1)
+        var j = alloc(Layout[Job[Self.In, Self.Out]](count=1)).unsafe_leak()
         j.unsafe_write(Job[Self.In, Self.Out](item^))
         c[].jobs[id] = Int(j)
         c[].cork.enqueue(id, c[].now())

@@ -2,14 +2,14 @@
 
 Both own a small heap block, so a struct holding them can move while threads wait on them."""
 from std.ffi import external_call
-from std.memory import alloc
+from std.memory import alloc, Layout
 
 
 struct Mutex(Movable):
     var p: MutPointer[UInt8, MutUntrackedOrigin]
 
     def __init__(out self):
-        self.p = alloc[UInt8](64)
+        self.p = alloc(Layout[UInt8](count=64)).unsafe_leak()
         for i in range(64):
             self.p.unsafe_offset(i)[] = 0
 
@@ -27,7 +27,7 @@ struct Cond(Movable):
     var p: MutPointer[UInt8, MutUntrackedOrigin]
 
     def __init__(out self):
-        self.p = alloc[UInt8](64)
+        self.p = alloc(Layout[UInt8](count=64)).unsafe_leak()
         for i in range(64):
             self.p.unsafe_offset(i)[] = 0
 
@@ -37,7 +37,7 @@ struct Cond(Movable):
 
     def timedwait(self, mu: Mutex, seconds: Float64) -> Bool:
         """wait() for at most `seconds`; False when it timed out."""
-        var ts = alloc[Int](2)
+        var ts = alloc(Layout[Int](count=2)).unsafe_leak()
         _ = external_call["clock_gettime", Int32](Int32(0), ts)  # CLOCK_REALTIME, the clock pthread_cond_timedwait uses
         var ns = ts.unsafe_offset(1)[] + Int(seconds * 1e9)
         ts.unsafe_offset(0)[] += ns // 1_000_000_000

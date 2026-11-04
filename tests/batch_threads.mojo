@@ -2,7 +2,6 @@
 a failing run_batch fails exactly its batch, an overloaded queue drops with the documented error, close() is clean.
 """
 from std.ffi import external_call
-from std.memory import alloc
 from std.atomic import Atomic, Ordering
 from std.testing import assert_equal, assert_true
 from bento.batch import Batcher, OVERLOADED
@@ -69,11 +68,11 @@ def worker(arg: Int) abi("C") -> Int:
 
 
 def run_workers(b: Int, stats: Int, n: Int) raises -> Tuple[Int, Int]:
-    var ctxs = alloc[Ctx](n)
-    var tids = alloc[UInt64](n)
+    var ctxs = List[Ctx](capacity=n)  # never resized, so the addresses handed to the threads stay valid
+    var tids = List[UInt64](length=n, fill=0)  # (alloc[T](n) with a runtime n is gone in Mojo 1.3)
     for i in range(n):
-        ctxs.unsafe_offset(i).unsafe_write(Ctx(b, stats, i, 0, 0, PER_WORKER))
-        var rc = external_call["pthread_create", Int32](tids.unsafe_offset(i), Int(0), worker, Int(ctxs.unsafe_offset(i)))
+        ctxs.append(Ctx(b, stats, i, 0, 0, PER_WORKER))
+        var rc = external_call["pthread_create", Int32](tids.unsafe_ptr().unsafe_offset(i), Int(0), worker, Int(ctxs.unsafe_ptr().unsafe_offset(i)))
         assert_equal(rc, 0)
     var bad = 0
     var errs = 0
@@ -85,14 +84,12 @@ def run_workers(b: Int, stats: Int, n: Int) raises -> Tuple[Int, Int]:
 
 
 def main() raises:
-    var stats = alloc[Int](3)
-    stats[0] = 0
-    stats[1] = 0
+    var stats = List[Int](length=3, fill=0)
     stats[2] = 2000
     # many workers, 2 ms per batch: everything correct, batches form, none exceeds max_batch_size
     var b = Batcher[Req, Int](run_batch, 10_000, MAX_BATCH)
     var bp = Int(Pointer(to=b))
-    var r = run_workers(bp, Int(stats), WORKERS)
+    var r = run_workers(bp, Int(stats.unsafe_ptr()), WORKERS)
     assert_equal(r[0], 0, "wrong results")
     assert_equal(r[1], 0, "unexpected errors")
     var st = b.stats()
@@ -102,20 +99,20 @@ def main() raises:
     assert_true(stats[0] < WORKERS * PER_WORKER, "no batching: one call per item")
     print("batched", WORKERS * PER_WORKER, "items into", stats[0], "calls, largest", stats[1])
     # a poisoned item fails its whole batch and nothing else
-    var one = b.submit(Req(21, Int(stats)))
+    var one = b.submit(Req(21, Int(stats.unsafe_ptr())))
     assert_equal(one, 42)
     var failed = False
     try:
-        _ = b.submit(Req(13, Int(stats)))
+        _ = b.submit(Req(13, Int(stats.unsafe_ptr())))
     except e:
         failed = True
         assert_equal(String(e), "poison 13")
     assert_true(failed, "poisoned batch did not raise")
-    assert_equal(b.submit(Req(22, Int(stats))), 44)
+    assert_equal(b.submit(Req(22, Int(stats.unsafe_ptr()))), 44)
     b.close()
     var closed = False
     try:
-        _ = b.submit(Req(1, Int(stats)))
+        _ = b.submit(Req(1, Int(stats.unsafe_ptr())))
     except e:
         closed = True
         assert_equal(String(e), "batcher: closed")
@@ -124,7 +121,7 @@ def main() raises:
     stats[2] = 120_000
     var slow = Batcher[Req, Int](run_batch, 30, 4)
     var sp = Int(Pointer(to=slow))
-    var o = run_workers(sp, Int(stats), 8)
+    var o = run_workers(sp, Int(stats.unsafe_ptr()), 8)
     assert_equal(o[0], 0, "wrong results under overload")
     assert_true(o[1] > 0, "no item was dropped under overload")
     slow.close()
@@ -133,26 +130,24 @@ def main() raises:
     stats[2] = 150_000
     var last = Batcher[Req, Int](run_batch, 10_000, 1)
     var lp = Int(Pointer(to=last))
-    var cx = alloc[Ctx](2)
-    var tids = alloc[UInt64](2)
+    var cx = List[Ctx](capacity=2)
+    var tids = List[UInt64](length=2, fill=0)
     for i in range(2):
-        cx.unsafe_offset(i).unsafe_write(Ctx(lp, Int(stats), i, 0, 0, 1))
-        assert_equal(external_call["pthread_create", Int32](tids.unsafe_offset(i), Int(0), worker, Int(cx.unsafe_offset(i))), 0)
+        cx.append(Ctx(lp, Int(stats.unsafe_ptr()), i, 0, 0, 1))
+        assert_equal(external_call["pthread_create", Int32](tids.unsafe_ptr().unsafe_offset(i), Int(0), worker, Int(cx.unsafe_ptr().unsafe_offset(i))), 0)
         _ = external_call["usleep", Int32](Int32(40_000))
     last.close()
     for i in range(2):
-        _ = external_call["pthread_join", Int32](tids.unsafe_offset(i)[], Int(0))
+        _ = external_call["pthread_join", Int32](tids[i], Int(0))
     assert_equal(cx[0].errs + cx[1].errs, 1, "exactly the queued item should fail on close")
     assert_equal(cx[0].bad + cx[1].bad, 0)
     # max_inflight 2: two batches run at once, every answer still its own
-    var cs = alloc[Int32](4)
-    for i in range(4):
-        cs.unsafe_offset(i).unsafe_write(0)
+    var cs = List[Int32](length=4, fill=0)
     var two = Batcher[Req, Int](run_batch_conc, 10_000, 4, 2)
     var tp = Int(Pointer(to=two))
-    var t = run_workers(tp, Int(cs), WORKERS)
+    var t = run_workers(tp, Int(cs.unsafe_ptr()), WORKERS)
     assert_equal(t[0], 0, "wrong results with max_inflight 2")
     assert_equal(t[1], 0, "errors with max_inflight 2")
-    assert_equal(Int(cs.unsafe_offset(1)[]), 2, "batches never overlapped, or overlapped more than max_inflight")
+    assert_equal(Int(cs[1]), 2, "batches never overlapped, or overlapped more than max_inflight")
     two.close()
     print("PASS batch-threads")
