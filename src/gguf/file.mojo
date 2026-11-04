@@ -1,9 +1,11 @@
 """GGUF files for Mojo: a reader over a read-only mmap of the whole file (header, key-values and
 tensor table parsed in place, tensor data as zero-copy spans) and a writer that produces the
 bytes gguf-py's GGUFWriter produces for the same calls."""
+from std.collections import Dict
 from std.ffi import external_call
 from std.memory import bitcast
 
+comptime MAX_DEPTH = 32  # nested arrays: _skip recurses once per level
 comptime MAGIC = 0x46554747  # "GGUF"
 comptime T_UINT8 = 0
 comptime T_INT8 = 1
@@ -19,18 +21,26 @@ comptime T_UINT64 = 10
 comptime T_INT64 = 11
 comptime T_FLOAT64 = 12
 # ggml types as gguf-py 0.19 knows them, by type id: elements and bytes per block (0 = unknown id)
-comptime _BLOCK = [1, 1, 32, 32, 0, 0, 32, 32, 32, 32, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 32, 256, 256, 256, 1, 1, 1, 1, 1, 256, 1, 0, 0, 0, 256, 256, 0, 0, 0, 32, 64, 128]
-comptime _BYTES = [4, 2, 18, 20, 0, 0, 22, 24, 34, 40, 84, 110, 144, 176, 210, 292, 66, 74, 98, 50, 18, 110, 82, 136, 1, 2, 4, 8, 8, 56, 2, 0, 0, 0, 54, 66, 0, 0, 0, 17, 36, 18]
+comptime _BLOCK: Array[Int, 42] = [1, 1, 32, 32, 0, 0, 32, 32, 32, 32, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 32, 256, 256, 256, 1, 1, 1, 1, 1, 256, 1, 0, 0, 0, 256, 256, 0, 0, 0, 32, 64, 128]
+comptime _BYTES: Array[Int, 42] = [4, 2, 18, 20, 0, 0, 22, 24, 34, 40, 84, 110, 144, 176, 210, 292, 66, 74, 98, 50, 18, 110, 82, 136, 1, 2, 4, 8, 8, 56, 2, 0, 0, 0, 54, 66, 0, 0, 0, 17, 36, 18]
 
 
 def _width(t: Int) -> Int:
     """Bytes of a fixed-width value type; 0 for string, array and unknown."""
-    return 1 if t in [0, 1, 7] else (2 if t in [2, 3] else (4 if t in [4, 5, 6] else (8 if t in [10, 11, 12] else 0)))
+    if t == 0 or t == 1 or t == 7:
+        return 1
+    if t == 2 or t == 3:
+        return 2
+    if t == 4 or t == 5 or t == 6:
+        return 4
+    if t == 10 or t == 11 or t == 12:
+        return 8
+    return 0
 
 
 def type_size(ttype: Int) -> Tuple[Int, Int]:
     """(elements per block, bytes per block) of a ggml type; (0, 0) when unknown."""
-    if ttype < 0 or ttype >= len(materialize[_BLOCK]()):
+    if ttype < 0 or ttype >= 42:
         return (0, 0)
     return (materialize[_BLOCK]()[ttype], materialize[_BYTES]()[ttype])
 
@@ -108,6 +118,7 @@ struct Gguf(Movable):
             raise Error("gguf: ", path, ": version ", self.version, " not supported")
         var n_tensors = self._u(8)
         var n_kv = self._u(8)
+        var seen = Dict[String, Int]()  # key -> 0: duplicate check in O(1) per key
         for _ in range(n_kv):
             var key = self._str()
             var vtype = self._u(4)
@@ -119,9 +130,9 @@ struct Gguf(Movable):
                 count = self._u(8)
                 self.pos = start
             self._skip(vtype)
-            for o in self.kvs:
-                if o.key == key:
-                    raise Error("gguf: ", path, ": duplicate key ", key)
+            if key in seen:
+                raise Error("gguf: ", path, ": duplicate key ", key)
+            seen[key.copy()] = 0
             self.kvs.append(KV(key^, vtype, atype, count, start, self.pos))
         var a = self.find("general.alignment")
         if a >= 0:
@@ -152,13 +163,14 @@ struct Gguf(Movable):
                 t.nbytes = numel * bs[1] // bs[0]
             self.tensors.append(t^)
         self.data_offset = pad_to(self.pos, self.alignment)
+        var names = Dict[String, Int]()
         for i in range(len(self.tensors)):
             ref t = self.tensors[i]
             if t.nbytes >= 0 and self.data_offset + t.offset + t.nbytes > self.size:
                 raise Error("gguf: ", path, ": tensor ", t.name, " runs past the end of the file")
-            for j in range(i):
-                if self.tensors[j].name == t.name:
-                    raise Error("gguf: ", path, ": duplicate tensor ", t.name)
+            if t.name in names:
+                raise Error("gguf: ", path, ": duplicate tensor ", t.name)
+            names[t.name.copy()] = 0
 
     def bytes(self) -> Span[UInt8, origin_of(self)]:
         """The whole file."""
@@ -174,28 +186,36 @@ struct Gguf(Movable):
         self.pos += n
         return v
 
-    def _str(mut self) raises -> String:
+    def _str_len(mut self) raises -> Int:
+        """Reads a string's length, checks it against the file and steps over the bytes; returns the length."""
         var n = self._u(8)
         if n < 0 or n > self.size - self.pos:
             raise Error("gguf: ", self.path, ": truncated string at byte ", self.pos)
         self.pos += n
+        return n
+
+    def _str(mut self) raises -> String:
+        var n = self._str_len()
         return String(from_utf8_lossy=self.bytes()[self.pos - n : self.pos])
 
-    def _skip(mut self, t: Int) raises:
+    def _skip(mut self, t: Int, depth: Int = 0) raises:
         if t == T_STRING:
-            _ = self._str()
+            _ = self._str_len()
         elif t == T_ARRAY:
+            if depth >= MAX_DEPTH:
+                raise Error("gguf: ", self.path, ": arrays nested more than ", MAX_DEPTH, " deep at byte ", self.pos)
             var et = self._u(4)
             var n = self._u(8)
             if n < 0:
                 raise Error("gguf: ", self.path, ": array length out of range at byte ", self.pos)
-            if _width(et):
-                if n > (self.size - self.pos) // _width(et):
+            var w = _width(et)
+            if w:
+                if n > (self.size - self.pos) // w:
                     raise Error("gguf: ", self.path, ": truncated array at byte ", self.pos)
-                self.pos += n * _width(et)
+                self.pos += n * w
             else:
                 for _ in range(n):
-                    self._skip(et)
+                    self._skip(et, depth + 1)
         elif _width(t):
             _ = self._u(_width(t))
         else:
