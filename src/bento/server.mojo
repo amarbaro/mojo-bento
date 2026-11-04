@@ -9,10 +9,8 @@ from std.time import perf_counter_ns
 from systemd import ready, status, stopping, watchdog as notify_watchdog, watchdog_usec
 from posix import PollSet, POLLIN, SIGINT, SIGTERM, close, recv, send_all, signal_fd, read_signals
 from bento.http import Request, Response, Limits, Parsed, parse_request, reason
-from bento.net import (
-    EpollBuf, EPOLLIN, EPOLLERR, EPOLLHUP, EPOLLRDHUP, EPOLLONESHOT, epoll_add, epoll_create, epoll_del,
-    epoll_rearm, local_port, tcp_accept, tcp_listen,
-)
+import aio
+from aio import IN, ERR, HUP, RDHUP, ONESHOT
 
 comptime _MutConn = Pointer[Conn, MutUntrackedOrigin]
 comptime _MutInt = Pointer[Int32, MutUntrackedOrigin]
@@ -52,7 +50,7 @@ struct Server[H: Handler](Movable):
     var handler: Self.H
     var limits: Limits
     var listen_fd: Int32
-    var ep: Int32
+    var loop: aio.Loop
     var sig: Int32
     var table: List[Conn]
     var ctl: List[Int32]  # [0] stop flag
@@ -62,8 +60,8 @@ struct Server[H: Handler](Movable):
     def __init__(out self, var handler: Self.H, host: String = "127.0.0.1", port: Int = 0, var limits: Limits = Limits(), max_conns: Int = 16384) raises:
         self.handler = handler^
         self.limits = limits^
-        self.listen_fd = tcp_listen(host, port)
-        self.ep = epoll_create()
+        self.listen_fd = aio.tcp_listen(port, host, 1024)
+        self.loop = aio.Loop(1)
         self.sig = -1
         self.table = List[Conn]()
         for _ in range(max_conns):
@@ -73,7 +71,10 @@ struct Server[H: Handler](Movable):
         self.conn_p = _MutConn(unsafe_from_address=Int(self.table.unsafe_ptr()))
 
     def port(self) -> Int:
-        return local_port(self.listen_fd)
+        try:
+            return aio.local_port(self.listen_fd)
+        except:
+            return -1
 
     def stop(self):
         """Ask every worker to finish its request and return. Safe from any thread."""
@@ -91,11 +92,10 @@ struct Server[H: Handler](Movable):
         """Run until stop() (or SIGINT/SIGTERM when signals; call posix.block_signals first in main).
         A signal first calls handler.draining(), keeps serving for drain_ms, then stops. Blocks the caller;
         spawns `workers` threads. Open connections are closed on return."""
-        if not epoll_add(self.ep, self.listen_fd, EPOLLIN | EPOLLONESHOT):
-            raise Error("bento: epoll_ctl(listen) failed")
+        self.loop.add(self.listen_fd, IN | ONESHOT, UInt64(self.listen_fd))
         if signals:
             self.sig = signal_fd([SIGINT, SIGTERM])
-            _ = epoll_add(self.ep, self.sig, EPOLLIN)
+            self.loop.add(self.sig, IN, UInt64(self.sig))
         var tids = List[UInt64](length=workers, fill=0)
         var me = Int(Pointer(to=self))
         for i in range(workers):
@@ -139,39 +139,49 @@ struct Server[H: Handler](Movable):
             close(self.sig)
 
     def _loop(self):
-        var evs = EpollBuf(1)
+        var evs = List[aio.Event]()
+        var buf = List[UInt32](length=3, fill=0)
         while not self.stopped():
-            if evs.wait(self.ep, _WAKE_MS) == 0:
+            evs.clear()
+            try:
+                if self.loop.ready(evs, buf, _WAKE_MS) == 0:
+                    continue
+            except:
                 continue
-            var fd = evs.fd(0)
+            var fd = Int32(evs[0].token)
             if fd == self.listen_fd:
                 self._accept()
             elif fd == self.sig:
                 if len(read_signals(fd)) > 0:
                     self._drain()
             else:
-                var keep = self._serve(fd, evs.events(0))
-                if keep:
-                    _ = epoll_rearm(self.ep, fd, EPOLLIN | EPOLLRDHUP | EPOLLONESHOT)
-                else:
-                    epoll_del(self.ep, fd)
-                    (self.conn_p + Int(fd))[].reset()
-                    close(fd)
+                var keep = self._serve(fd, Int(evs[0].events))
+                try:
+                    if keep:
+                        self.loop.modify(fd, IN | RDHUP | ONESHOT, UInt64(fd))
+                        continue
+                    self.loop.remove(fd)
+                except:
+                    pass
+                (self.conn_p + Int(fd))[].reset()
+                close(fd)
 
     def _accept(self):
         try:
             for _ in range(128):
-                var c = tcp_accept(self.listen_fd)
+                var c = aio.accept(self.listen_fd)
                 if c < 0:
                     break
                 if Int(c) >= len(self.table):
                     close(c)
                     continue
-                if not epoll_add(self.ep, c, EPOLLIN | EPOLLRDHUP | EPOLLONESHOT):
-                    close(c)
+                self.loop.add(c, IN | RDHUP | ONESHOT, UInt64(c))
         except:
             pass
-        _ = epoll_rearm(self.ep, self.listen_fd, EPOLLIN | EPOLLONESHOT)
+        try:
+            self.loop.modify(self.listen_fd, IN | ONESHOT, UInt64(self.listen_fd))
+        except:
+            pass
 
     def _serve(self, fd: Int32, events: Int) -> Bool:
         """Read what arrived on fd, answer every complete request. False: close the connection."""
@@ -180,7 +190,7 @@ struct Server[H: Handler](Movable):
         if n == 0:
             return False
         if n < 0:
-            return (events & (EPOLLERR | EPOLLHUP)) == 0
+            return (events & Int(ERR | HUP)) == 0
         var out = List[UInt8]()
         var keep = True
         var req = Request()

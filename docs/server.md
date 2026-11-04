@@ -1,6 +1,6 @@
 # HTTP server
 
-`src/bento/{net,http,server}.mojo`. Gate `b1` (`tests/run.sh b1`): 59 raw-HTTP rows in `tests/cases/http.txt`.
+`src/bento/{http,server}.mojo` on `src/aio` (mojo-aio). Gate `b1` (`tests/run.sh b1`): 59 raw-HTTP rows in `tests/cases/http.txt`.
 
 ## Shape
 
