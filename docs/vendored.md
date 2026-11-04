@@ -5,9 +5,9 @@ installed. Same license (Apache-2.0). Sync by hand when a library releases.
 
 | Directory | Library | Version |
 |---|---|---|
-| `src/posix` | mojo-posix | 0.1.1 |
-| `src/json` | mojo-json | 0.1.0 |
-| `src/systemd` | mojo-systemd | 0.1.0 |
+| `src/posix` | mojo-posix | 0.1.2 |
+| `src/json` | mojo-json | 0.1.1 |
+| `src/systemd` | mojo-systemd | 0.1.1 |
 | `src/safetensors` | mojo-safetensors | 0.1.1 |
 | `src/gguf` | mojo-gguf-core | 0.1.1 |
 | `src/aio` | mojo-aio | 0.1.0 (f9aa5e9) |
