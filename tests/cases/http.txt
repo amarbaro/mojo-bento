@@ -59,3 +59,6 @@ eof_inside_body	half	POST /b HTTP/1.1\r\nHost: x\r\nContent-Length: 10\r\n\r\nab
 eof_inside_head	half	GET / HTTP/1.1\r\nHost: x\r\n
 request_then_half_close	half	GET / HTTP/1.1\r\nHost: x\r\n\r\n
 error_after_good_request		GET /ok HTTP/1.1\r\nHost: x\r\n\r\nGET /bad HTTP/1.1\r\nHost : x\r\n\r\nGET /never HTTP/1.1\r\nHost: x\r\n\r\n
+chunk_size_wraps_negative		POST /b HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n8000000000000000\r\nabc\r\n0\r\n\r\n
+chunk_size_near_max		POST /b HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\nfffffffffffffffe\r\nabc\r\n0\r\n\r\n
+chunk_sum_overflows		POST /b HTTP/1.1\r\nHost: x\r\nTransfer-Encoding: chunked\r\n\r\n1\r\na\r\n7fffffffffffffff\r\nabc\r\n0\r\n\r\n

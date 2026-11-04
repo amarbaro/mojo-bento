@@ -104,7 +104,8 @@ def h11_conn(sock):
             req, body, told = (ev.method, ev.target, 0 if ev.http_version == b"1.0" else 1, hs), b"", False
         elif isinstance(ev, h11.Data):
             body += bytes(ev.data)
-            if len(body) > BODY_MAX:
+            # a declared chunk size past the limit is refused at once, like a declared Content-Length
+            if len(body) + getattr(conn._reader, "_bytes_in_chunk", 0) > BODY_MAX:
                 reply(sock, 413, close=True)
                 return
         elif isinstance(ev, h11.EndOfMessage):

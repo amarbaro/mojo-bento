@@ -298,7 +298,7 @@ def _chunked(buf: Span[UInt8, _], start: Int, mut req: Request, lim: Limits, con
         var i = at
         while i < le and _hex(buf[i]) >= 0:
             size = size * 16 + _hex(buf[i])
-            if i - at >= 16:
+            if size > lim.max_body:  # before it can grow past Int: 16 hex digits wrap negative
                 return Parsed(0, 413)
             i += 1
         if i == at:
