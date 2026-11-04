@@ -9,7 +9,7 @@ store gets the version from the Model layer), and when a version prefix matches 
 sorted (BentoML lists them in directory order).
 """
 from std.os import listdir, makedirs, remove, rmdir
-from std.os.path import exists, isdir
+from std.os.path import exists, isdir, islink
 from safetensors import SafeTensors
 from gguf import Gguf
 
@@ -126,7 +126,7 @@ def _write(path: String, text: String) raises:
 def _rmtree(path: String) raises:
     for name in listdir(path):
         var p = path + "/" + name
-        if isdir(p):
+        if isdir(p) and not islink(p):  # a link is removed, never followed
             _rmtree(p)
         else:
             remove(p)

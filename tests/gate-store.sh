@@ -25,4 +25,6 @@ for name in sorted({t.split(":")[0] for t, _ in la}):
 PY
 fi
 echo "ops: $(grep -vc '^#\|^$' tests/cases/store.txt), output lines: $(wc -l < .work/t/store.got)"
+scripts/mojo.sh tests/store_symlink.mojo .work/store_symlink 2> .work/t/store-build.err || { echo "FAIL build: tests/store_symlink.mojo"; cat .work/t/store-build.err; exit 1; }
+.work/store_symlink "$PWD/.work/t/symlink" || { echo "FAIL store: delete followed a symlink"; exit 1; }
 echo "PASS store"
