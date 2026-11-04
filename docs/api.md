@@ -1,7 +1,7 @@
 # API
 
 Everything here is exercised by a gate against BentoML 1.4.39 or by `examples/quickstart.mojo`; the detail and the
-differences from BentoML are in the page named in each row. Build with `mojo build -I src app.mojo`.
+differences from BentoML are in the page named in each row. Build with `scripts/deps.sh`, then `mojo build -I src -I lib app.mojo`.
 
 ## Serving
 
@@ -39,7 +39,8 @@ differences from BentoML are in the page named in each row. Build with `mojo bui
 | `scripts/bento build SERVICE.toml OUT` | Compiles the entry, ships the Modular runtime libraries it loads, copies the models of the store, writes `bento.lock` (sha256 of every file) and a systemd unit. | build.md |
 | `scripts/bento serve OUT [PORT]`, `scripts/bento verify OUT` | Runs the packaged service; rechecks every file against the lock. | build.md |
 
-## Vendored libraries
+## Dependencies
 
-`src/posix`, `src/json`, `src/systemd`, `src/safetensors` and `src/gguf` are copies of this author's Apache-2.0
-libraries so that a clone builds with the `mojo` package alone; [vendored.md](vendored.md) lists the sources.
+`aio`, `gguf`, `json`, `posix`, `safetensors` and `systemd` come from this author's libraries (`[tool.mojo] deps` in
+`pyproject.toml`). `scripts/deps.sh` fetches each into `lib/`, pinned to a commit; a `lib/<pkg>` that exists (a
+symlink to a local checkout) is kept. The conda package depends on the published `mojo-*` packages instead.

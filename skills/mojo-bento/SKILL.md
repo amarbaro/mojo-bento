@@ -9,8 +9,8 @@ BentoML's serving core in Mojo 1.2, checked against BentoML 1.4.39 by byte-compa
 
 ## Install
 
-`mojo build -I <repo>/src app.mojo -o app`, or copy `src/bento/` together with the vendored `src/posix/`,
-`src/json/`, `src/systemd/`, `src/safetensors/` and `src/gguf/`. Linux x86-64 only.
+`<repo>/scripts/deps.sh` (fetches mojo-aio, -gguf-core, -json, -posix, -safetensors, -systemd into `lib/`), then
+`mojo build -I <repo>/src -I <repo>/lib app.mojo -o app`. Linux x86-64 only.
 
 ## Use
 

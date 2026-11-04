@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p .work/t
-.venv/bin/mojo build -I src tests/batch_replay.mojo -o .work/t/batch_replay 2>.work/t/build.err || { echo "FAIL build: tests/batch_replay.mojo"; cat .work/t/build.err; exit 1; }
+scripts/mojo.sh tests/batch_replay.mojo .work/t/batch_replay 2>.work/t/build.err || { echo "FAIL build: tests/batch_replay.mojo"; cat .work/t/build.err; exit 1; }
 fail=0; n=0
 for f in tests/cases/batch/*.trace; do
   t=$(basename "$f" .trace); n=$((n+1))

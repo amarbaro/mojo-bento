@@ -31,12 +31,15 @@ def main() raises:
 
 ## Install
 
-Requires Mojo 1.2 (`uv sync` installs it) and Linux x86-64.
+Requires Mojo 1.2 (`uv sync` installs it) and Linux x86-64. bento imports six libraries by the same author:
+[mojo-aio](https://github.com/amarbaro/mojo-aio), [mojo-gguf-core](https://github.com/amarbaro/mojo-gguf-core),
+[mojo-json](https://github.com/amarbaro/mojo-json), [mojo-posix](https://github.com/amarbaro/mojo-posix),
+[mojo-safetensors](https://github.com/amarbaro/mojo-safetensors) and [mojo-systemd](https://github.com/amarbaro/mojo-systemd).
 
 | Way | Command |
 |---|---|
-| Source path | `mojo build -I path/to/mojo-bento/src app.mojo -o app` |
-| Vendor | copy `src/` (`bento/` plus the five libraries it imports, listed in [docs/vendored.md](docs/vendored.md)) |
+| Source path | `scripts/deps.sh` (fetches the six into `lib/`, pinned to a commit), then `mojo build -I path/to/mojo-bento/src -I path/to/mojo-bento/lib app.mojo -o app` |
+| conda | `pixi add mojo-bento` once published; it pulls the six libraries |
 
 `examples/quickstart.mojo` answers a request without a socket; `scripts/bento build SERVICE.toml OUT` packages a
 service into one directory ([docs/build.md](docs/build.md)).
