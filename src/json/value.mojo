@@ -158,6 +158,16 @@ struct Json(Copyable, Movable):
             k += Int(self.n[k].size)
         return Json()
 
+    def items(self) -> List[Json]:
+        """The elements of an array or the member values of an object, in one pass: O(n) where
+        `at(i)` in a loop is O(n^2). Empty for any other kind."""
+        var out = List[Json]()
+        var k = 1
+        while k < Int(self.n[0].size):
+            out.append(self._sub(k))
+            k += Int(self.n[k].size)
+        return out^
+
     def key_at(self, idx: Int) -> String:
         var c = 0
         var k = 1

@@ -175,10 +175,12 @@ def _coerce(v: Json, kind: Int, item: Int, name: String, idx: Int, mut out: Json
             issues.push(issue("list_type", _loc(name, idx), "Input should be a valid array"))
             return
         out = Json.array()
-        for i in range(v.len()):
+        var i = 0
+        for x in v.items():  # one pass; at(i) walks from the start each time
             var el = Json()
-            _coerce(v.at(i), item, T_STR, name, i, el, issues)
+            _coerce(x, item, T_STR, name, i, el, issues)
             out.push(el)
+            i += 1
 
 
 def validate(fields: List[Field], body: Json, mut args: Json, mut issues: Json):

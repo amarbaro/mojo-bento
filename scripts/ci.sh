@@ -10,5 +10,7 @@ uv sync || { echo "FAIL setup: uv sync"; exit 1; }
 mkdir -p .work/t
 scripts/mojo.sh examples/quickstart.mojo .work/t/quickstart 2> .work/build.err || { echo "FAIL build: examples/quickstart.mojo"; cat .work/build.err; exit 1; }
 tests/run.sh || { echo "FAIL gates: tests/run.sh"; exit 1; }
+scripts/mojo.sh tests/list_field_bench.mojo .work/t/list_field_bench 2> .work/build.err || { echo "FAIL build: tests/list_field_bench.mojo"; cat .work/build.err; exit 1; }
+.work/t/list_field_bench || { echo "FAIL perf: list field coercion"; exit 1; }
 .work/t/quickstart > /dev/null || { echo "FAIL example: examples/quickstart.mojo"; exit 1; }
 echo "PASS ci"
