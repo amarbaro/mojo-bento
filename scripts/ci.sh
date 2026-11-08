@@ -6,6 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 command -v uv >/dev/null || { echo "FAIL setup: uv not installed"; exit 1; }
 uv sync || { echo "FAIL setup: uv sync"; exit 1; }
+export MOJO="${MOJO:-.venv/bin/mojo}"
 scripts/deps.sh
 .venv/bin/python -c 'import platform, bentoml; print("oracle python", platform.python_version(), "bentoml", bentoml.__version__)'
 mkdir -p .work/t
