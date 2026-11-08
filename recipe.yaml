@@ -1,7 +1,7 @@
 # rattler-build recipe, modular-community shape.
 # Build locally: rattler-build build -r recipe.yaml -c https://conda.modular.com/max -c conda-forge
 context:
-  version: 0.1.2
+  version: 0.1.3
 
 package:
   name: "mojo-bento"
