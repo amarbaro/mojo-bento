@@ -43,7 +43,7 @@ WantedBy=default.target
 E
   printf '#!/bin/sh\nexec "$(dirname "$(readlink -f "$0")")/bin/bento" serve "$(dirname "$(readlink -f "$0")")" "$@"\n' > "$out/bento-serve"
   cp "$0" "$out/bin/bento"; chmod +x "$out/bento-serve" "$out/bin/bento"
-  { echo "# name $name version $(key version "$toml") commit $(git -C "$root" rev-parse --short HEAD) mojo $("$root/.venv/bin/mojo" --version | head -1)"
+  { echo "# name $name version $(key version "$toml") commit $(git -C "$root" rev-parse --short HEAD) mojo $("${MOJO:-$root/.venv/bin/mojo}" --version | head -1)"
     (cd "$out" && find . -type f ! -name bento.lock | sort | xargs sha256sum); } > "$out/bento.lock"
   echo "BUILT $out ($(du -sh "$out" | cut -f1))"
 }

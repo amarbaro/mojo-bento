@@ -8,7 +8,8 @@ echo v3 > "$W/store/iris/latest"; echo weights-v3 > "$W/store/iris/v3/model.bin"
 scripts/bento build tests/b7/service.toml "$W/build"
 mv "$W/build" "$W/moved"; B=$W/moved
 [ "$(cat "$B/models/iris/latest")" = v3 ] && [ -f "$B/models/iris/v3/model.bin" ] && [ -f "$B/models/tok/v2/tokenizer.json" ] && [ ! -e "$B/models/iris/v1" ] || { echo "FAIL models: wrong set in $B/models"; exit 1; }
-readelf -d "$B/bin/b2svc" | grep -q 'ORIGIN/../lib' || { echo "FAIL rpath"; exit 1; }
+dyn=$(readelf -d "$B/bin/b2svc")
+grep -q 'ORIGIN/../lib' <<<"$dyn" || { echo "FAIL rpath"; exit 1; }
 scripts/bento verify "$B"
 # sandbox: only system dirs and the bento; the Mojo venv and the repo do not exist inside
 bwrap --ro-bind /usr /usr --symlink usr/lib /lib --symlink usr/lib64 /lib64 --symlink usr/bin /bin --proc /proc --dev /dev \

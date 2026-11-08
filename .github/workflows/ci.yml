@@ -3,10 +3,8 @@ on:
   push:
     branches: [main]
   pull_request:
+permissions:
+  contents: write   # the badge step pushes the orphan `badges` branch (main pushes only)
 jobs:
-  check:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.0
-      - run: scripts/ci.sh
+  ci:
+    uses: amarbaro/mojo-libs/.github/workflows/lib-ci.yml@v1

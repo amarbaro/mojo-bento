@@ -4,4 +4,4 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 [ $# -eq 2 ] || { echo "FAIL usage: scripts/mojo.sh SRC OUT"; exit 2; }
 mkdir -p "$(dirname "$2")"
-.venv/bin/mojo build -I src -I lib "$1" -o "$2"
+"${MOJO:-.venv/bin/mojo}" build -I src -I lib "$1" -o "$2"
