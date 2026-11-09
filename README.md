@@ -11,6 +11,9 @@ and SSE streaming, an adaptive batcher that makes BentoML's own batching decisio
 layout. Every behaviour is compared with BentoML 1.4.39, h11 and `prometheus_client` by a gate that runs in CI. Linux
 x86-64, CPU only, no dependency but the `mojo` package.
 
+Install: `pixi workspace channel add https://conda.modular.com/max https://prefix.dev/amarbaro/amarbaro`, then `pixi add mojo-bento` (import `bento`). From source: `git clone https://github.com/amarbaro/mojo-bento`, then `mojo run -I mojo-bento/src app.mojo`.
+Toolchains: Mojo 1.2 stable, and the nightly 1.3.0.dev2026110805 in the weekly [mojo-libs](https://github.com/amarbaro/mojo-libs) matrix (36 libraries on stable, 35 on nightly).
+
 ```mojo
 from json import Json
 from posix import block_signals
@@ -39,7 +42,7 @@ Requires Mojo 1.2 (`uv sync` installs it) and Linux x86-64. bento imports six li
 | Way | Command |
 |---|---|
 | Source path | `scripts/deps.sh` (fetches the six into `lib/`, pinned to a commit), then `mojo build -I path/to/mojo-bento/src -I path/to/mojo-bento/lib app.mojo -o app` |
-| conda | `pixi add mojo-bento` once published; it pulls the six libraries |
+| conda | `pixi add mojo-bento` from https://prefix.dev/amarbaro/amarbaro; it pulls the six libraries |
 
 `examples/quickstart.mojo` answers a request without a socket; `scripts/bento build SERVICE.toml OUT` packages a
 service into one directory ([docs/build.md](docs/build.md)).
