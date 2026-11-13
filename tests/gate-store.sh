@@ -6,13 +6,16 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p .work/t
+# BentoML lists ambiguous versions in directory order (os.scandir: ext4 and btrfs differ); compare that list sorted
+canon() { awk -F'versions found: ' 'NF==2{n=split($2,v,", ");for(i=2;i<=n;i++)for(j=i;j>1&&v[j]<v[j-1];j--){t=v[j];v[j]=v[j-1];v[j-1]=t};s=v[1];for(i=2;i<=n;i++)s=s", "v[i];print $1 FS s;next}1' "$1"; }
+same() { cmp -s <(canon "$1") <(canon "$2"); }
 scripts/mojo.sh tests/store_cases.mojo .work/store_cases 2> .work/t/store-build.err || { echo "FAIL build: tests/store_cases.mojo"; cat .work/t/store-build.err; exit 1; }
 if [[ -x .venv/bin/python ]]; then
   .venv/bin/python -I tools/store_oracle.py tests/cases/store.txt tests/cases/store-fixture "$PWD/.work/t/oracle-store" 2>/dev/null > .work/t/store.live
-  cmp -s .work/t/store.live tests/cases/store.expect || { echo "FAIL oracle drift: store.expect"; diff .work/t/store.live tests/cases/store.expect | head -10; exit 1; }
+  same .work/t/store.live tests/cases/store.expect || { echo "FAIL oracle drift: store.expect"; diff .work/t/store.live tests/cases/store.expect | head -10; exit 1; }
 fi
 timeout 30 .work/store_cases tests/cases/store.txt tests/cases/store-fixture "$PWD/.work/t/mojo-store" > .work/t/store.got
-cmp -s .work/t/store.got tests/cases/store.expect || { echo "FAIL store: output differs from BentoML's"; diff tests/cases/store.expect .work/t/store.got | head -20; exit 1; }
+same .work/t/store.got tests/cases/store.expect || { echo "FAIL store: output differs from BentoML's"; diff tests/cases/store.expect .work/t/store.got | head -20; exit 1; }
 if [[ -x .venv/bin/python ]]; then
   .venv/bin/python -I - "$PWD/.work/t/mojo-store/models" "$PWD/.work/t/oracle-store/models" <<'PY' || { echo "FAIL readback: BentoML reads the Mojo-written store differently"; exit 1; }
 import sys
